@@ -3,7 +3,7 @@ import { inputToMoves, scoreRound } from "./lib"
 
 async function main() {
     // read input
-    const input = await readInput({ day: 2, example: true })
+    const input = await readInput({ day: 2, example: false })
 
     // convert input to moves array
     const moves = inputToMoves(input)

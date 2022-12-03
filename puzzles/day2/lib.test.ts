@@ -74,6 +74,6 @@ describe('score', () => {
     })
 
     test("opp scissors vs my scissors should result in a draw with score of 6", () => {
-        expect(scoreRound({ opp: OppMove.Paper, me: MyMove.Rock })).toStrictEqual([1, Result.Loss])
+        expect(scoreRound({ opp: OppMove.Scissors, me: MyMove.Scissors })).toStrictEqual([6, Result.Draw])
     })
 })
