@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "day2/part1": "tsx puzzles/day2/part1",
+    "day2/part2": "tsx puzzles/day2/part2",
     "test": "jest"
   },
   "keywords": [],

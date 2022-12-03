@@ -16,9 +16,14 @@ export interface Move {
 }
 
 export enum Result {
-    Win,
-    Draw,
-    Loss,
+    Win = "Z",
+    Draw = "Y",
+    Loss = "X",
+}
+
+export interface Outcome {
+    opp: OppMove
+    result: Result
 }
 
 /**
@@ -54,7 +59,39 @@ const pitchWithOppMove = {
 }
 
 /**
- * Score a round.
+ * Decide my move from outcome.
+ */
+export const decideMyMove = (outcome: Outcome) => {
+    if (outcome.opp === OppMove.Rock) return myMoveFromResultAndOppMove.rock(outcome.result)
+    if (outcome.opp === OppMove.Paper) return myMoveFromResultAndOppMove.paper(outcome.result)
+    return myMoveFromResultAndOppMove.scissors(outcome.result)
+}
+
+const myMoveFromResultAndOppMove = {
+    // decide my move from opp rock and result
+    rock(result: Result): MyMove {
+        if (result === Result.Win) return MyMove.Paper
+        if (result === Result.Loss) return MyMove.Scissors
+        return MyMove.Rock
+    },
+
+    // decide my move from opp paper and result
+    paper(result: Result): MyMove {
+        if (result === Result.Win) return MyMove.Scissors
+        if (result === Result.Loss) return MyMove.Rock
+        return MyMove.Paper
+    },
+
+    // decide my move from opp scissors and result
+    scissors(result: Result): MyMove {
+        if (result === Result.Win) return MyMove.Rock
+        if (result === Result.Loss) return MyMove.Paper
+        return MyMove.Scissors
+    },
+}
+
+/**
+ * Score a round from opp move and my move.
  */
 export const scoreRound = (move: Move): [number, Result] => {
     const result = pitch(move)
@@ -74,6 +111,26 @@ export const scoreRound = (move: Move): [number, Result] => {
 }
 
 /**
+ * Score a round from opp move and result.
+ */
+export const scoreRoundFromOutcome = (outcome: Outcome): [number, MyMove] => {
+    const myMove = decideMyMove(outcome)
+    let score = 0
+
+    // increment score for move
+    if (myMove === MyMove.Rock) score += 1
+    if (myMove === MyMove.Paper) score += 2
+    if (myMove === MyMove.Scissors) score += 3
+
+    // increment score for result
+    if (outcome.result === Result.Win) score += 6
+    if (outcome.result === Result.Draw) score += 3
+    if (outcome.result === Result.Loss) score += 0
+
+    return [score, myMove]
+}
+
+/**
  * Parse input string to moves array.
  */
 export const inputToMoves = (input: string) => {
@@ -81,15 +138,34 @@ export const inputToMoves = (input: string) => {
     const lines = input.split("\n").map(line => line.trim())
 
     // transform each input line to a move
-    const pitches = lines.map((line): Move => {
+    const moves = lines.map((line): Move => {
         const [x, y] = line.split(" ", 2) as [unknown, unknown]
 
         if (isValidOppMove(x) && isValidMyMove(y)) {
             return { opp: x, me: y }
         }
-        throw new Error("invalid moves")
+        throw new Error("invalid move")
     })
-    return pitches
+    return moves
+}
+
+/**
+ * Parse input string to outcomes array.
+ */
+export const inputToOutcomes = (input: string) => {
+    // split input by new line and trim whitespaces
+    const lines = input.split("\n").map(line => line.trim())
+
+    // transform each input line to a move
+    const outcomes = lines.map((line): Outcome => {
+        const [x, r] = line.split(" ", 2) as [unknown, unknown]
+
+        if (isValidOppMove(x) && isValidResult(r)) {
+            return { opp: x, result: r }
+        }
+        throw new Error("invalid outcome")
+    })
+    return outcomes
 }
 
 function isValidOppMove(move: unknown): move is OppMove {
@@ -98,4 +174,8 @@ function isValidOppMove(move: unknown): move is OppMove {
 
 function isValidMyMove(move: unknown): move is MyMove {
     return move === MyMove.Rock || move === MyMove.Paper || move === MyMove.Scissors
+}
+
+function isValidResult(result: unknown): result is Result {
+    return result === Result.Win || result === Result.Draw || result === Result.Loss
 }
